@@ -1,4 +1,4 @@
-package com.example.lab7_recyclerviewpatterns;
+package com.example.lab8;
 
 import org.junit.Test;
 

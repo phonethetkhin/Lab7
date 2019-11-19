@@ -1,28 +1,31 @@
-package com.example.lab7_recyclerviewpatterns;
+package com.example.lab8;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.lab7_recyclerviewpatterns.model.BookDetailedModel;
+import com.example.lab8.DB.BookDB;
+import com.example.lab8.model.BookDetailedModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BookDetail  extends AppCompatActivity {
 private BookDetailedModel bookDetailedModel;
 ImageView imgCoverPhoto;
 TextView tvTitle,tvAuthor,tvPublishedYear,tvNumberofPages,tvGenre,tvOlanguage,tvDescription;
-
-
+BookDB db=new BookDB(BookDetail.this);
+FloatingActionButton fabEdit;
 private void InitiateViews()
 {
     imgCoverPhoto=findViewById(R.id.imgCoverPhoto);
@@ -33,12 +36,19 @@ private void InitiateViews()
     tvGenre=findViewById(R.id.tvGenre);
     tvOlanguage=findViewById(R.id.tvOlanguage);
     tvDescription=findViewById(R.id.tvDescription);
+    fabEdit=findViewById(R.id.fabEdit);
 }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
         InitiateViews();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         bookDetailedModel=getIntent().getParcelableExtra("Value");
         getSupportActionBar().setTitle(bookDetailedModel.getTitle());
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -51,7 +61,22 @@ private void InitiateViews()
         tvGenre.setText(bookDetailedModel.getGenre());
         tvOlanguage.setText("Language: "+bookDetailedModel.getOriginalLanguage());
         tvDescription.setText(bookDetailedModel.getDescription());
+        fabEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(BookDetail.this,UpdateBook.class);
+                Bundle b=new Bundle();
+                b.putParcelable("OldValue",bookDetailedModel);
+                i.putExtras(b);
+                startActivity(i);
+            }
+        });
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.deletemenu,menu);
+        return true;
     }
 
     @Override
@@ -63,7 +88,30 @@ private void InitiateViews()
 
             startActivity(i);
             finish();
-            return true;
+            break;
+
+        case R.id.delete:
+AlertDialog.Builder alertdialogbuilder=new AlertDialog.Builder(BookDetail.this);
+            alertdialogbuilder.setMessage("Are You Sure You Want to Remove This Book");
+            alertdialogbuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                   db.RemoveBook(bookDetailedModel.getBookID());
+                    Toast.makeText(BookDetail.this, "Remove Successfully", Toast.LENGTH_SHORT).show();
+Intent intent=new Intent(BookDetail.this,MainActivity.class);
+startActivity(intent);
+
+                }
+            });
+            alertdialogbuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                }
+            });
+            AlertDialog dialog=alertdialogbuilder.create();
+            dialog.show();
+
     }
         return super.onOptionsItemSelected(item);
     }

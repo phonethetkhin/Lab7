@@ -1,14 +1,18 @@
-package com.example.lab7_recyclerviewpatterns;
+package com.example.lab8;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
-import com.example.lab7_recyclerviewpatterns.adapters.BookAdapter;
-import com.example.lab7_recyclerviewpatterns.model.BookDetailedModel;
+import com.example.lab8.DB.BookDB;
+import com.example.lab8.adapters.BookAdapter;
+import com.example.lab8.model.BookDetailedModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,21 +20,40 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     RecyclerView rvMain;
     List<BookDetailedModel> bookModelList=new ArrayList<>();
+    FloatingActionButton fabAdd;
+    BookDB db=new BookDB(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         rvMain=findViewById(R.id.rvMain);
+        fabAdd=findViewById(R.id.fabAdd);
+        fabAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this,AddBook.class);
+                startActivity(i);
+            }
+        });
+
         getSupportActionBar().setTitle("Home");
+
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bookModelList=db.GetBooks();
         rvMain.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
 
         rvMain.setLayoutManager(new LinearLayoutManager(MainActivity.this,RecyclerView.VERTICAL,false));
         rvMain.setHasFixedSize(true);
-        rvMain.setAdapter(new BookAdapter(AddData()));
-
-
+        rvMain.setAdapter(new BookAdapter(bookModelList));
     }
+
     private List<BookDetailedModel> AddData()
     {
         bookModelList.add(new BookDetailedModel(1,"https://cdn.waterstones.com/override/v2/large/9780/0997/9780099740919.jpg","The Handmaid's Tale","MARGARET ATWOOD","Novel","En_US",
